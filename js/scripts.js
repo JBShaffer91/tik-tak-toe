@@ -1,77 +1,114 @@
 // ********** Business Logic **********
 
-const playerX = 'X';
-const playerO = 'O';
-
-let currentPlayer = playerX;
-
-// Creates an empty board
-// Creates an empty board
-function createBoard() {
-  return [
-    [null, null, null],
-    [null, null, null],
-    [null, null, null]
-  ];
-}
-
-
-// Plays a move on the board
-function play(row, column) {
-  board[row][column] = currentPlayer;
-  currentPlayer = getNextPlayer(currentPlayer);
-}
-
-// Returns the player that will move next
-function getNextPlayer(currentPlayer) {
-  if (currentPlayer === playerX) {
-    return playerO;
-  } else {
-    return playerX;
+class TicTacToe {
+  constructor() {
+    this.playerX = 'X';
+    this.playerO = 'O';
+    this.currentPlayer = this.playerX;
+    this.boardElement = document.getElementById('board');
+    this.board = this.createBoard();
+    this.cells = document.querySelectorAll('.cell');
   }
-}
 
-// Returns an array of available moves
-function getAvailableMoves(board) {
-  const moves = [];
-  for (let row = 0; row < 3; row++) {
-    for (let col = 0; col < 3; col++) {
-      if (board[row][col] === null) {
-        moves.push({row, col});
+  createBoard() {
+    return [
+      [null, null, null],
+      [null, null, null],
+      [null, null, null]
+    ];
+  }
+
+  play(row, column) {
+    this.board[row][column] = this.currentPlayer;
+    this.currentPlayer = this.getNextPlayer(this.currentPlayer);
+  }
+
+  getNextPlayer(currentPlayer) {
+    if (currentPlayer === this.playerX) {
+      return this.playerO;
+    } else {
+      return this.playerX;
+    }
+  }
+
+  getAvailableMoves() {
+    const moves = [];
+    for (let row = 0; row < 3; row++) {
+      for (let col = 0; col < 3; col++) {
+        if (this.board[row][col] === null) {
+          moves.push({row, col});
+        }
       }
     }
+    return moves;
   }
-  return moves;
-}
 
-// Returns true if the board is full, false otherwise
-function isBoardFull() {
-  return getAvailableMoves(board).length === 0;
-}
+  isBoardFull() {
+    return this.getAvailableMoves().length === 0;
+  }
 
-// Returns true if the game is over, false otherwise
-function checkWin(player) {
-  // Check rows
-  for (let row = 0; row < 3; row++) {
-    if (board[row][0] === player && board[row][1] === player && board[row][2] === player) {
+  checkWin(player) {
+    // Check rows
+    for (let row = 0; row < 3; row++) {
+      if (this.board[row][0] === player && this.board[row][1] === player && this.board[row][2] === player) {
+        return true;
+      }
+    }
+
+    // Check columns
+    for (let i = 0; i < 3; i++) {
+      if (this.board[0][i] === player && this.board[1][i] === player && this.board[2][i] === player) {
+        return true;
+      }
+    }
+
+    // Check diagonals
+    if (this.board[0][0] === player && this.board[1][1] === player && this.board[2][2] === player) {
       return true;
     }
-  }
-
-  // Check columns
-  for (let i = 0; i < 3; i++) {
-    if (board[0][i] === player && board[1][i] === player && board[2][i] === player) {
+    if (this.board[0][2] === player && this.board[1][1] === player && this.board[2][0] === player) {
       return true;
     }
+
+    return false;
   }
 
-  // Check diagonals
-  if (board[0][0] === player && board[1][1] === player && board[2][2] === player) {
-    return true;
-  }
-  if (board[0][2] === player && board[1][1] === player && board[2][0] === player) {
-    return true;
-  }
+  // ********** UI Logic **********
 
-  return false;
+  attachCellListeners() {
+    this.cells.forEach((cell) => {
+      cell.addEventListener('click', () => {
+        // Check if the cell is already marked
+        if (cell.textContent !== '') {
+          return;
+        }
+
+        // Get the row and column index of the clicked cell
+        const cellIndex = parseInt(cell.id.split('-')[1]);
+        const row = Math.floor(cellIndex / 3);
+        const col = cellIndex % 3;
+
+        // Play the move on the board
+        this.play(row, col);
+
+        // Update the UI with the new move
+        cell.textContent = this.currentPlayer;
+
+        // Check if the game is over
+        if (this.checkWin(this.currentPlayer)) {
+          alert(`Player ${this.currentPlayer} wins!`);
+          return;
+        } else if (this.isBoardFull()) {
+          alert('The game is a tie!');
+          return;
+        }
+
+        // Switch to the next player
+        this.currentPlayer = this.getNextPlayer(this.currentPlayer);
+      });
+    });
+  }
 }
+
+const ticTacToe = new TicTacToe();
+ticTacToe.attachCellListeners();
